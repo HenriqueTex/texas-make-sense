@@ -123,5 +123,42 @@
     .DropDownMenuWrapper {
       align-self: stretch;
     }
+
+    .SaveStatusWrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .SaveStatusIndicator {
+        font-size: 11px;
+        opacity: 0.6;
+        user-select: none;
+
+        &.saving { color: #f0c040; opacity: 1; }
+        &.saved   { color: #60d060; opacity: 1; }
+        &.unsaved { color: #f0c040; opacity: 0.8; }
+        &.error   { color: #ff6060; opacity: 1; }
+      }
+
+      .SaveButton {
+        background: none;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        border-radius: 4px;
+        padding: 3px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s;
+
+        &:hover {
+          background: rgba(255,255,255,0.1);
+        }
+
+        &:disabled {
+          opacity: 0.4;
+          cursor: default;
+        }
+      }
+    }
   }
 }

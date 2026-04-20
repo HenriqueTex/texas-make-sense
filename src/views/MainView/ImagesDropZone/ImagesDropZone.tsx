@@ -11,6 +11,7 @@ import {PopupWindowType} from '../../../data/enums/PopupWindowType';
 import {updateActivePopupType, updateProjectData} from '../../../store/general/actionCreators';
 import {ProjectData} from '../../../store/general/types';
 import {ImageDataUtil} from '../../../utils/ImageDataUtil';
+import {updateActiveProjectId} from '../../../store/projects/actionCreators';
 import { sortBy } from 'lodash';
 
 interface IProps {
@@ -18,6 +19,7 @@ interface IProps {
     addImageDataAction: (imageData: ImageData[]) => any;
     updateProjectDataAction: (projectData: ProjectData) => any;
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
+    updateActiveProjectIdAction: (id: string | null) => any;
     projectData: ProjectData;
 }
 
@@ -30,7 +32,9 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
 
     const startEditor = (projectType: ProjectType) => {
         if (acceptedFiles.length > 0) {
-            const files = sortBy(acceptedFiles, (item: File) => item.name)
+            const files = sortBy(acceptedFiles, (item: File) => item.name);
+            const projectId = crypto.randomUUID();
+            props.updateActiveProjectIdAction(projectId);
             props.updateProjectDataAction({
                 ...props.projectData,
                 type: projectType
@@ -105,7 +109,8 @@ const mapDispatchToProps = {
     updateActiveImageIndexAction: updateActiveImageIndex,
     addImageDataAction: addImageData,
     updateProjectDataAction: updateProjectData,
-    updateActivePopupTypeAction: updateActivePopupType
+    updateActivePopupTypeAction: updateActivePopupType,
+    updateActiveProjectIdAction: updateActiveProjectId
 };
 
 const mapStateToProps = (state: AppState) => ({

@@ -10,14 +10,28 @@ import {ImageButton} from '../../Common/ImageButton/ImageButton';
 import {Settings} from '../../../settings/Settings';
 import {ProjectData} from '../../../store/general/types';
 import DropDownMenu from './DropDownMenu/DropDownMenu';
+import {SaveStatus} from '../../../store/projects/types';
+import {useSaveProject} from '../../../hooks/useSaveProject';
 
 interface IProps {
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
     updateProjectDataAction: (projectData: ProjectData) => any;
     projectData: ProjectData;
+    activeProjectId: string | null;
+    saveStatus: SaveStatus;
 }
 
+const saveStatusLabel: Record<SaveStatus, string> = {
+    idle: '',
+    saved: 'Saved',
+    saving: 'Saving…',
+    unsaved: 'Unsaved',
+    error: 'Save error'
+};
+
 const TopNavigationBar: React.FC<IProps> = (props) => {
+    const save = useSaveProject();
+
     const onFocus = (event: React.FocusEvent<HTMLInputElement>) => {
         event.target.setSelectionRange(0, event.target.value.length);
     };
@@ -30,10 +44,10 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
         props.updateProjectDataAction({
             ...props.projectData,
             name: value
-        })
+        });
     };
 
-    const closePopup = () => props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT)
+    const closePopup = () => props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT);
 
     return (
         <div className='TopNavigationBar'>
@@ -64,6 +78,20 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
                         onFocus={onFocus}
                     />
                 </div>
+                {props.activeProjectId && (
+                    <div className='NavigationBarGroupWrapper SaveStatusWrapper'>
+                        <span className={`SaveStatusIndicator ${props.saveStatus}`}>
+                            {saveStatusLabel[props.saveStatus]}
+                        </span>
+                        <button
+                            className='SaveButton'
+                            onClick={save}
+                            disabled={props.saveStatus === 'saving'}
+                        >
+                            Save
+                        </button>
+                    </div>
+                )}
                 <div className='NavigationBarGroupWrapper'>
                     <ImageButton
                         image={'ico/github-logo.png'}
@@ -83,7 +111,9 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = (state: AppState) => ({
-    projectData: state.general.projectData
+    projectData: state.general.projectData,
+    activeProjectId: state.projects.activeProjectId,
+    saveStatus: state.projects.saveStatus
 });
 
 export default connect(

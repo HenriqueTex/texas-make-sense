@@ -1,19 +1,21 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './ExitProjectPopup.scss';
-import { GenericYesNoPopup } from "../GenericYesNoPopup/GenericYesNoPopup";
+import {GenericYesNoPopup} from '../GenericYesNoPopup/GenericYesNoPopup';
 import {
     updateActiveImageIndex as storeUpdateActiveImageIndex,
     updateActiveLabelNameId as storeUpdateActiveLabelNameId,
     updateFirstLabelCreatedFlag as storeUpdateFirstLabelCreatedFlag,
     updateImageData as storeUpdateImageData,
     updateLabelNames as storeUpdateLabelNames
-} from "../../../store/labels/actionCreators";
-import { AppState } from "../../../store";
-import { connect } from "react-redux";
-import { ImageData, LabelName } from "../../../store/labels/types";
-import { PopupActions } from "../../../logic/actions/PopupActions";
-import { ProjectData } from "../../../store/general/types";
-import { updateProjectData as storeUpdateProjectData } from "../../../store/general/actionCreators";
+} from '../../../store/labels/actionCreators';
+import {AppState} from '../../../store';
+import {connect} from 'react-redux';
+import {ImageData, LabelName} from '../../../store/labels/types';
+import {PopupActions} from '../../../logic/actions/PopupActions';
+import {ProjectData} from '../../../store/general/types';
+import {updateProjectData as storeUpdateProjectData} from '../../../store/general/actionCreators';
+import {updateActiveProjectId as storeUpdateActiveProjectId} from '../../../store/projects/actionCreators';
+import {saveProjectNow} from '../../../logic/project/ProjectLoader';
 
 interface IProps {
     updateActiveImageIndex: (activeImageIndex: number) => any;
@@ -22,6 +24,7 @@ interface IProps {
     updateImageData: (imageData: ImageData[]) => any;
     updateFirstLabelCreatedFlag: (firstLabelCreatedFlag: boolean) => any;
     updateProjectData: (projectData: ProjectData) => any;
+    updateActiveProjectId: (id: string | null) => any;
 }
 
 const ExitProjectPopup: React.FC<IProps> = ({
@@ -30,27 +33,38 @@ const ExitProjectPopup: React.FC<IProps> = ({
     updateActiveImageIndex,
     updateImageData,
     updateFirstLabelCreatedFlag,
-    updateProjectData
+    updateProjectData,
+    updateActiveProjectId
 }: IProps) => {
-
+    const [isSaving, setIsSaving] = useState(false);
 
     const renderContent = () => {
         return (
             <div className="ExitProjectPopupContent">
                 <div className="Message">
-                    Are you sure you want to leave the editor? You will permanently lose all your progress.
+                    {isSaving
+                        ? 'Saving your project…'
+                        : 'Your project is saved automatically. You can return to it at any time from the home screen.'
+                    }
                 </div>
             </div>
         );
     };
 
-    const onAccept = () => {
+    const onAccept = async () => {
+        setIsSaving(true);
+        try {
+            await saveProjectNow();
+        } catch {
+            // Exit anyway even if save fails
+        }
         updateActiveLabelNameId(null);
         updateLabelNames([]);
-        updateProjectData({ type: null, name: "my-project-name" });
+        updateProjectData({type: null, name: 'my-project-name'});
         updateActiveImageIndex(null);
         updateImageData([]);
         updateFirstLabelCreatedFlag(false);
+        updateActiveProjectId(null);
         PopupActions.close();
     };
 
@@ -60,13 +74,16 @@ const ExitProjectPopup: React.FC<IProps> = ({
 
     return (
         <GenericYesNoPopup
-            title={"Exit project"}
+            title={'Exit project'}
             renderContent={renderContent}
-            acceptLabel={"Exit"}
+            acceptLabel={'Exit'}
             onAccept={onAccept}
-            rejectLabel={"Back"}
+            disableAcceptButton={isSaving}
+            disableRejectButton={isSaving}
+            rejectLabel={'Back'}
             onReject={onReject}
-        />);
+        />
+    );
 };
 
 const mapDispatchToProps = {
@@ -75,7 +92,8 @@ const mapDispatchToProps = {
     updateProjectData: storeUpdateProjectData,
     updateActiveImageIndex: storeUpdateActiveImageIndex,
     updateImageData: storeUpdateImageData,
-    updateFirstLabelCreatedFlag: storeUpdateFirstLabelCreatedFlag
+    updateFirstLabelCreatedFlag: storeUpdateFirstLabelCreatedFlag,
+    updateActiveProjectId: storeUpdateActiveProjectId
 };
 
 const mapStateToProps = (state: AppState) => ({});

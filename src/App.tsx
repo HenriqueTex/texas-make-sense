@@ -1,5 +1,6 @@
 import React from 'react';
 import './App.scss';
+import {useAutoSave} from './hooks/useAutoSave';
 import EditorView from './views/EditorView/EditorView';
 import MainView from './views/MainView/MainView';
 import {ProjectType} from './data/enums/ProjectType';
@@ -34,6 +35,8 @@ const App: React.FC<IProps> = (
         roboflowAPIDetails
     }
 ) => {
+    useAutoSave();
+
     const selectRoute = () => {
         if (!!PlatformModel.mobileDeviceData.manufacturer && !!PlatformModel.mobileDeviceData.os)
             return <MobileMainView/>;
@@ -66,8 +69,8 @@ const App: React.FC<IProps> = (
 const mapStateToProps = (state: AppState) => ({
     projectType: state.general.projectData.type,
     windowSize: state.general.windowSize,
-    isSSDObjectDetectorLoaded: state.ai.isSSDObjectDetectorLoaded,
-    isPoseDetectorLoaded: state.ai.isPoseDetectorLoaded,
+    isObjectDetectorLoaded: state.ai.isSSDObjectDetectorLoaded,
+    isPoseDetectionLoaded: state.ai.isPoseDetectorLoaded,
     isYOLOV5ObjectDetectorLoaded: state.ai.isYOLOV5ObjectDetectorLoaded,
     roboflowAPIDetails: state.ai.roboflowAPIDetails
 });

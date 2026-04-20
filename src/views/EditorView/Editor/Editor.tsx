@@ -33,7 +33,7 @@ interface IProps {
     size: ISize;
     imageData: ImageData;
     activeLabelType: LabelType;
-    updateImageDataById: (id: string, newImageData: ImageData) => any;
+    updateImageDataById: (id: string, newImageData: ImageData, undoable?: boolean) => any;
     activePopupType: PopupWindowType;
     activeLabelId: string;
     customCursorStyle: CustomCursorStyle;
@@ -129,8 +129,10 @@ class Editor extends React.Component<IProps, IState> {
     };
 
     private saveLoadedImage = (image: HTMLImageElement, imageData: ImageData) => {
-        imageData.loadStatus = true;
-        this.props.updateImageDataById(imageData.id, imageData);
+        this.props.updateImageDataById(imageData.id, {
+            ...imageData,
+            loadStatus: true
+        }, false);
         ImageRepository.storeImage(imageData.id, image);
         EditorActions.setActiveImage(image);
         AIActions.detect(imageData.id, image);

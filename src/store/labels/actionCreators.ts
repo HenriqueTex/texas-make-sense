@@ -11,6 +11,18 @@ export function updateActiveImageIndex(activeImageIndex: number): LabelsActionTy
     };
 }
 
+export function undoLabelsState(): LabelsActionTypes {
+    return {
+        type: Action.UNDO_LABELS_STATE
+    };
+}
+
+export function clearLabelsHistory(): LabelsActionTypes {
+    return {
+        type: Action.CLEAR_LABELS_HISTORY
+    };
+}
+
 export function updateActiveLabelNameId(activeLabelNameId: string): LabelsActionTypes {
     return {
         type: Action.UPDATE_ACTIVE_LABEL_NAME_ID,
@@ -47,39 +59,43 @@ export function updateActiveLabelType(activeLabelType: LabelType): LabelsActionT
     };
 }
 
-export function updateImageDataById(id: string, newImageData: ImageData): LabelsActionTypes {
+export function updateImageDataById(id: string, newImageData: ImageData, undoable: boolean = true): LabelsActionTypes {
     return {
         type: Action.UPDATE_IMAGE_DATA_BY_ID,
         payload: {
             id,
-            newImageData
+            newImageData,
+            undoable
         },
     };
 }
 
-export function addImageData(imageData: ImageData[]): LabelsActionTypes {
+export function addImageData(imageData: ImageData[], undoable: boolean = true): LabelsActionTypes {
     return {
         type: Action.ADD_IMAGES_DATA,
         payload: {
             imageData,
+            undoable
         },
     };
 }
 
-export function updateImageData(imageData: ImageData[]): LabelsActionTypes {
+export function updateImageData(imageData: ImageData[], undoable: boolean = true): LabelsActionTypes {
     return {
         type: Action.UPDATE_IMAGES_DATA,
         payload: {
             imageData,
+            undoable
         },
     };
 }
 
-export function updateLabelNames(labels: LabelName[]): LabelsActionTypes {
+export function updateLabelNames(labels: LabelName[], undoable: boolean = true): LabelsActionTypes {
     return {
         type: Action.UPDATE_LABEL_NAMES,
         payload: {
-            labels
+            labels,
+            undoable
         }
     }
 }

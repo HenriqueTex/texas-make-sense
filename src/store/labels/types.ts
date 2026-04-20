@@ -72,6 +72,18 @@ export type LabelsState = {
     imagesData: ImageData[];
     firstLabelCreatedFlag: boolean;
     labels: LabelName[];
+    undoStack: LabelsHistorySnapshot[];
+}
+
+export type LabelsHistorySnapshot = {
+    activeImageIndex: number;
+    activeLabelNameId: string;
+    activeLabelType: LabelType;
+    activeLabelId: string | null;
+    highlightedLabelId: string;
+    imagesData: ImageData[];
+    firstLabelCreatedFlag: boolean;
+    labels: LabelName[];
 }
 
 interface UpdateActiveImageIndex {
@@ -114,6 +126,7 @@ interface UpdateImageDataById {
     payload: {
         id: string;
         newImageData: ImageData;
+        undoable?: boolean;
     }
 }
 
@@ -121,6 +134,7 @@ interface AddImageData {
     type: typeof Action.ADD_IMAGES_DATA;
     payload: {
         imageData: ImageData[];
+        undoable?: boolean;
     }
 }
 
@@ -128,6 +142,7 @@ interface UpdateImageData {
     type: typeof Action.UPDATE_IMAGES_DATA;
     payload: {
         imageData: ImageData[];
+        undoable?: boolean;
     }
 }
 
@@ -135,6 +150,7 @@ interface UpdateLabelNames {
     type: typeof Action.UPDATE_LABEL_NAMES;
     payload: {
         labels: LabelName[];
+        undoable?: boolean;
     }
 }
 
@@ -143,6 +159,14 @@ interface UpdateFirstLabelCreatedFlag {
     payload: {
         firstLabelCreatedFlag: boolean;
     }
+}
+
+interface UndoLabelsState {
+    type: typeof Action.UNDO_LABELS_STATE;
+}
+
+interface ClearLabelsHistory {
+    type: typeof Action.CLEAR_LABELS_HISTORY;
 }
 
 export type LabelsActionTypes = UpdateActiveImageIndex
@@ -155,3 +179,5 @@ export type LabelsActionTypes = UpdateActiveImageIndex
     | UpdateActiveLabelId
     | UpdateHighlightedLabelId
     | UpdateFirstLabelCreatedFlag
+    | UndoLabelsState
+    | ClearLabelsHistory

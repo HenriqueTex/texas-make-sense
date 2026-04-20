@@ -22,7 +22,7 @@ interface IProps {
     isChecked?: boolean;
     onClick?: () => any;
     isSelected?: boolean;
-    updateImageDataById: (id: string, newImageData: ImageData) => any;
+    updateImageDataById: (id: string, newImageData: ImageData, undoable?: boolean) => any;
 }
 
 interface IState {
@@ -85,8 +85,10 @@ class ImagePreview extends React.Component<IProps, IState> {
     };
 
     private saveLoadedImage = (image: HTMLImageElement, imageData: ImageData) => {
-        imageData.loadStatus = true;
-        this.props.updateImageDataById(imageData.id, imageData);
+        this.props.updateImageDataById(imageData.id, {
+            ...imageData,
+            loadStatus: true
+        }, false);
         ImageRepository.storeImage(imageData.id, image);
         if (imageData.id === this.props.imageData.id) {
             this.setState({ image });

@@ -74,16 +74,19 @@ export class PointRenderEngine extends BaseRenderEngine {
             const pointOnImage: IPoint = RenderEngineUtil.transferPointFromViewPortContentToImage(pointSnapped, data);
             const imageData = LabelsSelector.getActiveImageData();
 
-            imageData.labelPoints = imageData.labelPoints.map((labelPoint: LabelPoint) => {
-                if (labelPoint.id === activeLabelPoint.id) {
-                    return {
-                        ...labelPoint,
-                        point: pointOnImage
-                    };
-                }
-                return labelPoint;
-            });
-            store.dispatch(updateImageDataById(imageData.id, imageData));
+            const newImageData: ImageData = {
+                ...imageData,
+                labelPoints: imageData.labelPoints.map((labelPoint: LabelPoint) => {
+                    if (labelPoint.id === activeLabelPoint.id) {
+                        return {
+                            ...labelPoint,
+                            point: pointOnImage
+                        };
+                    }
+                    return labelPoint;
+                })
+            };
+            store.dispatch(updateImageDataById(imageData.id, newImageData));
         }
         EditorActions.setViewPortActionsDisabledStatus(false);
     }
@@ -192,8 +195,11 @@ export class PointRenderEngine extends BaseRenderEngine {
         const activeLabelId = LabelsSelector.getActiveLabelNameId();
         const imageData: ImageData = LabelsSelector.getActiveImageData();
         const labelPoint: LabelPoint = LabelUtil.createLabelPoint(activeLabelId, point);
-        imageData.labelPoints.push(labelPoint);
-        store.dispatch(updateImageDataById(imageData.id, imageData));
+        const newImageData: ImageData = {
+            ...imageData,
+            labelPoints: imageData.labelPoints.concat(labelPoint)
+        };
+        store.dispatch(updateImageDataById(imageData.id, newImageData));
         store.dispatch(updateFirstLabelCreatedFlag(true));
         store.dispatch(updateActiveLabelId(labelPoint.id));
     };

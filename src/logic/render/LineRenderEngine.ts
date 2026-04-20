@@ -203,8 +203,11 @@ export class LineRenderEngine extends BaseRenderEngine {
             line: lineOnImage,
             isVisible: true
         };
-        imageData.labelLines.push(labelLine);
-        store.dispatch(updateImageDataById(imageData.id, imageData));
+        const newImageData: ImageData = {
+            ...imageData,
+            labelLines: imageData.labelLines.concat(labelLine)
+        };
+        store.dispatch(updateImageDataById(imageData.id, newImageData));
         store.dispatch(updateFirstLabelCreatedFlag(true));
         store.dispatch(updateActiveLabelId(labelLine.id));
         this.lineCreationStartPoint = null
@@ -235,26 +238,29 @@ export class LineRenderEngine extends BaseRenderEngine {
     private applyUpdateToLineLabel(data: EditorData) {
         const imageData: ImageData = LabelsSelector.getActiveImageData();
         const activeLabel: LabelLine = LabelsSelector.getActiveLineLabel();
-        imageData.labelLines = imageData.labelLines.map((lineLabel: LabelLine) => {
-            if (lineLabel.id !== activeLabel.id) {
-                return lineLabel
-            } else {
-                const snappedMousePosition: IPoint =
-                    RectUtil.snapPointToRect(data.mousePositionOnViewPortContent, data.viewPortContentImageRect);
-                const mousePositionOnImage = RenderEngineUtil.transferPointFromViewPortContentToImage(
-                    snappedMousePosition, data
-                );
-                return {
-                    ...lineLabel,
-                    line: {
-                        start: this.lineUpdateAnchorType === LineAnchorType.START ? mousePositionOnImage : lineLabel.line.start,
-                        end: this.lineUpdateAnchorType === LineAnchorType.END ? mousePositionOnImage : lineLabel.line.end
+        const newImageData: ImageData = {
+            ...imageData,
+            labelLines: imageData.labelLines.map((lineLabel: LabelLine) => {
+                if (lineLabel.id !== activeLabel.id) {
+                    return lineLabel
+                } else {
+                    const snappedMousePosition: IPoint =
+                        RectUtil.snapPointToRect(data.mousePositionOnViewPortContent, data.viewPortContentImageRect);
+                    const mousePositionOnImage = RenderEngineUtil.transferPointFromViewPortContentToImage(
+                        snappedMousePosition, data
+                    );
+                    return {
+                        ...lineLabel,
+                        line: {
+                            start: this.lineUpdateAnchorType === LineAnchorType.START ? mousePositionOnImage : lineLabel.line.start,
+                            end: this.lineUpdateAnchorType === LineAnchorType.END ? mousePositionOnImage : lineLabel.line.end
+                        }
                     }
                 }
-            }
-        });
+            })
+        };
 
-        store.dispatch(updateImageDataById(imageData.id, imageData));
+        store.dispatch(updateImageDataById(imageData.id, newImageData));
         store.dispatch(updateActiveLabelId(activeLabel.id));
     }
 

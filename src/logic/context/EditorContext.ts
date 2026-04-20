@@ -53,6 +53,14 @@ export class EditorContext extends BaseContext {
             }
         },
         {
+            keyCombo: PlatformUtil.isMac(window.navigator.userAgent) ? ["Meta", "z"] : ["Control", "z"],
+            action: (event: KeyboardEvent) => {
+                event.preventDefault();
+                LabelActions.undoLastAction();
+                EditorActions.fullRender();
+            }
+        },
+        {
             keyCombo: PlatformUtil.isMac(window.navigator.userAgent) ? ["Alt", "+"] : ["Control", "+"],
             action: (event: KeyboardEvent) => {
                 ViewPortActions.zoomIn();

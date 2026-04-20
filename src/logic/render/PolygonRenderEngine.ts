@@ -301,8 +301,11 @@ export class PolygonRenderEngine extends BaseRenderEngine {
         const activeLabelId = LabelsSelector.getActiveLabelNameId();
         const imageData: ImageData = LabelsSelector.getActiveImageData();
         const labelPolygon: LabelPolygon = LabelUtil.createLabelPolygon(activeLabelId, polygon);
-        imageData.labelPolygons.push(labelPolygon);
-        store.dispatch(updateImageDataById(imageData.id, imageData));
+        const newImageData: ImageData = {
+            ...imageData,
+            labelPolygons: imageData.labelPolygons.concat(labelPolygon)
+        };
+        store.dispatch(updateImageDataById(imageData.id, newImageData));
         store.dispatch(updateFirstLabelCreatedFlag(true));
         store.dispatch(updateActiveLabelId(labelPolygon.id));
     };
@@ -326,25 +329,28 @@ export class PolygonRenderEngine extends BaseRenderEngine {
     private applyResizeToPolygonLabel(data: EditorData) {
         const imageData: ImageData = LabelsSelector.getActiveImageData();
         const activeLabel: LabelPolygon = LabelsSelector.getActivePolygonLabel();
-        imageData.labelPolygons = imageData.labelPolygons.map((polygon: LabelPolygon) => {
-            if (polygon.id !== activeLabel.id) {
-                return polygon
-            } else {
-                return {
-                    ...polygon,
-                    vertices: polygon.vertices.map((value: IPoint, index: number) => {
-                        if (index !== this.resizeAnchorIndex) {
-                            return value;
-                        } else {
-                            const snappedMousePosition: IPoint =
-                                RectUtil.snapPointToRect(data.mousePositionOnViewPortContent, data.viewPortContentImageRect);
-                            return RenderEngineUtil.transferPointFromViewPortContentToImage(snappedMousePosition, data);
-                        }
-                    })
+        const newImageData: ImageData = {
+            ...imageData,
+            labelPolygons: imageData.labelPolygons.map((polygon: LabelPolygon) => {
+                if (polygon.id !== activeLabel.id) {
+                    return polygon
+                } else {
+                    return {
+                        ...polygon,
+                        vertices: polygon.vertices.map((value: IPoint, index: number) => {
+                            if (index !== this.resizeAnchorIndex) {
+                                return value;
+                            } else {
+                                const snappedMousePosition: IPoint =
+                                    RectUtil.snapPointToRect(data.mousePositionOnViewPortContent, data.viewPortContentImageRect);
+                                return RenderEngineUtil.transferPointFromViewPortContentToImage(snappedMousePosition, data);
+                            }
+                        })
+                    }
                 }
-            }
-        });
-        store.dispatch(updateImageDataById(imageData.id, imageData));
+            })
+        };
+        store.dispatch(updateImageDataById(imageData.id, newImageData));
         store.dispatch(updateActiveLabelId(activeLabel.id));
     }
 

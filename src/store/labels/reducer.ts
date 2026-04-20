@@ -1,5 +1,8 @@
 import {LabelsActionTypes, LabelsState, ImageData} from './types';
 import {Action} from '../Actions';
+import {applyLabelsHistorySnapshot, createLabelsHistorySnapshot} from './history';
+
+const UNDO_STACK_LIMIT = 50;
 
 const initialState: LabelsState = {
     activeImageIndex: null,
@@ -9,8 +12,14 @@ const initialState: LabelsState = {
     highlightedLabelId: null,
     imagesData: [],
     firstLabelCreatedFlag: false,
-    labels: []
+    labels: [],
+    undoStack: []
 };
+
+const pushUndoSnapshot = (state: LabelsState, nextState: LabelsState): LabelsState => ({
+    ...nextState,
+    undoStack: [...state.undoStack, createLabelsHistorySnapshot(state)].slice(-UNDO_STACK_LIMIT)
+});
 
 export function labelsReducer(
     state = initialState,
@@ -48,36 +57,56 @@ export function labelsReducer(
             }
         }
         case Action.UPDATE_IMAGE_DATA_BY_ID: {
-            return {
+            const nextState = {
                 ...state,
                 imagesData: state.imagesData.map((imageData: ImageData) =>
                     imageData.id === action.payload.id ? action.payload.newImageData : imageData
                 )
-            }
+            };
+            return action.payload.undoable === false ? nextState : pushUndoSnapshot(state, nextState);
         }
         case Action.ADD_IMAGES_DATA: {
-            return {
+            const nextState = {
                 ...state,
                 imagesData: state.imagesData.concat(action.payload.imageData)
-            }
+            };
+            return action.payload.undoable === false ? nextState : pushUndoSnapshot(state, nextState);
         }
         case Action.UPDATE_IMAGES_DATA: {
-            return {
+            const nextState = {
                 ...state,
                 imagesData: action.payload.imageData
-            }
+            };
+            return action.payload.undoable === false ? nextState : pushUndoSnapshot(state, nextState);
         }
         case Action.UPDATE_LABEL_NAMES: {
-            return {
+            const nextState = {
                 ...state,
                 labels: action.payload.labels
-            }
+            };
+            return action.payload.undoable === false ? nextState : pushUndoSnapshot(state, nextState);
         }
         case Action.UPDATE_FIRST_LABEL_CREATED_FLAG: {
             return {
                 ...state,
                 firstLabelCreatedFlag: action.payload.firstLabelCreatedFlag
             }
+        }
+        case Action.UNDO_LABELS_STATE: {
+            if (state.undoStack.length === 0) {
+                return state;
+            }
+            const previousSnapshot = state.undoStack[state.undoStack.length - 1];
+            return {
+                ...applyLabelsHistorySnapshot(state, previousSnapshot),
+                undoStack: state.undoStack.slice(0, -1)
+            };
+        }
+        case Action.CLEAR_LABELS_HISTORY: {
+            return {
+                ...state,
+                undoStack: []
+            };
         }
         default:
             return state;

@@ -17,7 +17,6 @@ import {
   LabelRect,
 } from "../../store/labels/types";
 import { LabelStatus } from "../../data/enums/LabelStatus";
-import { remove } from "lodash";
 
 export class ImageActions {
   public static getPreviousImage(): void {
@@ -137,9 +136,8 @@ export class ImageActions {
       case LabelType.IMAGE_RECOGNITION:
         const labelId: string = labelNames[labelIndex].id;
         if (imageData.labelNameIds.includes(labelId)) {
-          newImageData.labelNameIds = remove(
-            imageData.labelNameIds,
-            (element: string) => element !== labelId
+          newImageData.labelNameIds = imageData.labelNameIds.filter(
+            (currentLabelId: string) => currentLabelId !== labelId
           );
         } else {
           newImageData.labelNameIds = imageData.labelNameIds.concat(labelId);

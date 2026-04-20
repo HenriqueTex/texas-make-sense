@@ -5,7 +5,7 @@ import {TextButton} from '../../Common/TextButton/TextButton';
 import TextInput from '../../Common/TextInput/TextInput';
 import {ImageData} from '../../../store/labels/types';
 import {connect} from 'react-redux';
-import {addImageData, updateActiveImageIndex} from '../../../store/labels/actionCreators';
+import {addImageData, clearLabelsHistory, updateActiveImageIndex} from '../../../store/labels/actionCreators';
 import {AppState} from '../../../store';
 import {ProjectType} from '../../../data/enums/ProjectType';
 import {PopupWindowType} from '../../../data/enums/PopupWindowType';
@@ -17,6 +17,7 @@ import { sortBy } from 'lodash';
 
 interface IProps {
     updateActiveImageIndexAction: (activeImageIndex: number) => any;
+    clearLabelsHistoryAction: () => any;
     addImageDataAction: (imageData: ImageData[]) => any;
     updateProjectDataAction: (projectData: ProjectData) => any;
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
@@ -43,6 +44,7 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
         if (acceptedFiles.length > 0 && hasProjectName) {
             const files = sortBy(acceptedFiles, (item: File) => item.name);
             const projectId = crypto.randomUUID();
+            props.clearLabelsHistoryAction();
             props.updateActiveImageIndexAction(0);
             props.addImageDataAction(files.map((file:File) => ImageDataUtil
                 .createImageDataFromFileData(file)));
@@ -124,6 +126,7 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
 
 const mapDispatchToProps = {
     updateActiveImageIndexAction: updateActiveImageIndex,
+    clearLabelsHistoryAction: clearLabelsHistory,
     addImageDataAction: addImageData,
     updateProjectDataAction: updateProjectData,
     updateActivePopupTypeAction: updateActivePopupType,

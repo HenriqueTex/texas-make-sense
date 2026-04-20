@@ -3,6 +3,7 @@ import {updateProjectData} from '../../store/general/actionCreators';
 import {NotificationType} from '../../data/enums/NotificationType';
 import {submitNewNotification} from '../../store/notifications/actionCreators';
 import {
+    clearLabelsHistory,
     updateImageData,
     updateLabelNames,
     updateActiveImageIndex,
@@ -31,6 +32,7 @@ export async function openProject(projectId: string): Promise<boolean> {
     // from one project to another — prevents saving a partial/empty snapshot
     // which would corrupt the project and cause a black screen on next open.
     store.dispatch(setProjectLoading(true));
+    store.dispatch(clearLabelsHistory());
 
     // Reset all transient UI state before loading new project
     store.dispatch(updateActiveLabelNameId(null));
@@ -40,8 +42,8 @@ export async function openProject(projectId: string): Promise<boolean> {
     store.dispatch(updateFirstLabelCreatedFlag(false));
 
     store.dispatch(updateSaveStatus('saved'));
-    store.dispatch(updateLabelNames(stored.labels));
-    store.dispatch(updateImageData(stored.images.map(deserializeImageData)));
+    store.dispatch(updateLabelNames(stored.labels, false));
+    store.dispatch(updateImageData(stored.images.map(deserializeImageData), false));
     store.dispatch(updateActiveImageIndex(0));
     store.dispatch(updateActiveProjectId(stored.id));
     store.dispatch(updateProjectData({name: stored.name, type: stored.type}));

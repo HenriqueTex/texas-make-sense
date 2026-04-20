@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import './ExitProjectPopup.scss';
 import {GenericYesNoPopup} from '../GenericYesNoPopup/GenericYesNoPopup';
 import {
+    clearLabelsHistory as storeClearLabelsHistory,
     updateActiveImageIndex as storeUpdateActiveImageIndex,
     updateActiveLabelNameId as storeUpdateActiveLabelNameId,
     updateFirstLabelCreatedFlag as storeUpdateFirstLabelCreatedFlag,
@@ -20,6 +21,7 @@ import {saveProjectNow} from '../../../logic/project/ProjectLoader';
 interface IProps {
     updateActiveImageIndex: (activeImageIndex: number) => any;
     updateActiveLabelNameId: (activeLabelId: string) => any;
+    clearLabelsHistory: () => any;
     updateLabelNames: (labelNames: LabelName[]) => any;
     updateImageData: (imageData: ImageData[]) => any;
     updateFirstLabelCreatedFlag: (firstLabelCreatedFlag: boolean) => any;
@@ -29,6 +31,7 @@ interface IProps {
 
 const ExitProjectPopup: React.FC<IProps> = ({
     updateActiveLabelNameId,
+    clearLabelsHistory,
     updateLabelNames,
     updateActiveImageIndex,
     updateImageData,
@@ -62,11 +65,12 @@ const ExitProjectPopup: React.FC<IProps> = ({
         // resets — otherwise the popup with isSaving=true bleeds into the
         // main screen and leaves the UI with disabled buttons.
         PopupActions.close();
+        clearLabelsHistory();
         updateActiveLabelNameId(null);
-        updateLabelNames([]);
+        updateLabelNames([], false);
         updateProjectData({type: null, name: 'my-project-name'});
         updateActiveImageIndex(null);
-        updateImageData([]);
+        updateImageData([], false);
         updateFirstLabelCreatedFlag(false);
         updateActiveProjectId(null);
     };
@@ -91,6 +95,7 @@ const ExitProjectPopup: React.FC<IProps> = ({
 
 const mapDispatchToProps = {
     updateActiveLabelNameId: storeUpdateActiveLabelNameId,
+    clearLabelsHistory: storeClearLabelsHistory,
     updateLabelNames: storeUpdateLabelNames,
     updateProjectData: storeUpdateProjectData,
     updateActiveImageIndex: storeUpdateActiveImageIndex,

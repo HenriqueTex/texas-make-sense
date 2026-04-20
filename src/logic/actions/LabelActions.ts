@@ -2,13 +2,17 @@ import {LabelsSelector} from '../../store/selectors/LabelsSelector';
 import {ImageData, LabelLine, LabelName, LabelPoint, LabelPolygon, LabelRect} from '../../store/labels/types';
 import {filter} from 'lodash';
 import {store} from '../../index';
-import {updateActiveLabelId, updateHighlightedLabelId, updateImageData, updateImageDataById} from '../../store/labels/actionCreators';
+import {undoLabelsState, updateActiveLabelId, updateHighlightedLabelId, updateImageData, updateImageDataById} from '../../store/labels/actionCreators';
 import {LabelType} from '../../data/enums/LabelType';
 import {LabelUtil} from '../../utils/LabelUtil';
 import {LabelStatus} from '../../data/enums/LabelStatus';
 import {v4 as uuidv4} from 'uuid';
 
 export class LabelActions {
+    public static undoLastAction() {
+        store.dispatch(undoLabelsState());
+    }
+
     public static deleteActiveLabel() {
         const activeImageData: ImageData = LabelsSelector.getActiveImageData();
         const activeLabelId: string = LabelsSelector.getActiveLabelId();

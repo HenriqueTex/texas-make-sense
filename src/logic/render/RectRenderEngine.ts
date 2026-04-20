@@ -93,16 +93,19 @@ export class RectRenderEngine extends BaseRenderEngine {
                 const scaledRect: IRect = RectUtil.scaleRect(resizeRect, scale);
 
                 const imageData = LabelsSelector.getActiveImageData();
-                imageData.labelRects = imageData.labelRects.map((labelRect: LabelRect) => {
-                    if (labelRect.id === activeLabelRect.id) {
-                        return {
-                            ...labelRect,
-                            rect: scaledRect
-                        };
-                    }
-                    return labelRect;
-                });
-                store.dispatch(updateImageDataById(imageData.id, imageData));
+                const newImageData: ImageData = {
+                    ...imageData,
+                    labelRects: imageData.labelRects.map((labelRect: LabelRect) => {
+                        if (labelRect.id === activeLabelRect.id) {
+                            return {
+                                ...labelRect,
+                                rect: scaledRect
+                            };
+                        }
+                        return labelRect;
+                    })
+                };
+                store.dispatch(updateImageDataById(imageData.id, newImageData));
             }
         }
         this.endRectTransformation()
@@ -237,8 +240,11 @@ export class RectRenderEngine extends BaseRenderEngine {
         const activeLabelId = LabelsSelector.getActiveLabelNameId();
         const imageData: ImageData = LabelsSelector.getActiveImageData();
         const labelRect: LabelRect = LabelUtil.createLabelRect(activeLabelId, rect);
-        imageData.labelRects.push(labelRect);
-        store.dispatch(updateImageDataById(imageData.id, imageData));
+        const newImageData: ImageData = {
+            ...imageData,
+            labelRects: imageData.labelRects.concat(labelRect)
+        };
+        store.dispatch(updateImageDataById(imageData.id, newImageData));
         store.dispatch(updateFirstLabelCreatedFlag(true));
         store.dispatch(updateActiveLabelId(labelRect.id));
     };

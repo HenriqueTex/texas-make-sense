@@ -23,6 +23,7 @@ interface IProps {
     isActive: boolean;
     isHighlighted: boolean;
     isVisible?: boolean;
+    showShortcutBeforeMarker?: boolean;
     id: string;
     value?: LabelName;
     options: LabelName[];
@@ -162,6 +163,22 @@ class LabelInputField extends React.Component<IProps, IState> {
         )
     }
 
+    private getMarkerTextColor = (backgroundColor?: string): string => {
+        if (!backgroundColor || !backgroundColor.startsWith('#')) {
+            return '#ffffff';
+        }
+
+        const normalizedHex = backgroundColor.length === 4
+            ? backgroundColor.split('').map((char, index) => index === 0 ? char : char + char).join('')
+            : backgroundColor;
+        const red = parseInt(normalizedHex.slice(1, 3), 16);
+        const green = parseInt(normalizedHex.slice(3, 5), 16);
+        const blue = parseInt(normalizedHex.slice(5, 7), 16);
+        const luminance = (0.299 * red) + (0.587 * green) + (0.114 * blue);
+
+        return luminance > 186 ? '#111111' : '#ffffff';
+    };
+
     public render() {
         const {size, id, value, onDelete} = this.props;
         return(
@@ -185,8 +202,13 @@ class LabelInputField extends React.Component<IProps, IState> {
                 >
                     <div
                         className='Marker'
-                        style={value ? {backgroundColor: value.color} : {}}
-                    />
+                        style={value ? {
+                            backgroundColor: value.color,
+                            color: this.getMarkerTextColor(value.color)
+                        } : {}}
+                    >
+                        {this.props.showShortcutBeforeMarker && value?.shortcut && value.shortcut}
+                    </div>
                     <div className='Content'>
                         <div className='ContentWrapper'>
                             <div className='DropdownLabel'

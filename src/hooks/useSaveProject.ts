@@ -2,7 +2,7 @@ import {useCallback, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {AppState} from '../store';
 import {updateProjectList, updateSaveStatus} from '../store/projects/actionCreators';
-import {listProjects, saveProject, serializeImageData, StoredProject} from '../services/ProjectStore';
+import {canPersistProject, listProjects, saveProject, serializeImageData, StoredProject} from '../services/ProjectStore';
 import {ProjectMeta} from '../store/projects/types';
 import {ImageData, LabelName} from '../store/labels/types';
 import {ProjectData} from '../store/general/types';
@@ -37,6 +37,7 @@ export function useSaveProject(): () => Promise<void> {
     return useCallback(async () => {
         const {activeProjectId, projectList, projectData, imagesData, labels} = snapshotRef.current;
         if (!activeProjectId) return;
+        if (!canPersistProject(projectData, imagesData)) return;
 
         dispatch(updateSaveStatus('saving'));
         try {

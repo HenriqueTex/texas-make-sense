@@ -8,10 +8,11 @@ import { sample } from 'lodash';
 import {Settings} from '../settings/Settings';
 
 export class LabelUtil {
-    public static createLabelName(name: string): LabelName {
+    public static createLabelName(name: string, shortcut: string = ''): LabelName {
         return {
             id: uuidv4(),
             name,
+            shortcut,
             color: sample(Settings.LABEL_COLORS_PALETTE)
         }
     }

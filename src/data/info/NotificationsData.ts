@@ -57,5 +57,9 @@ export const NotificationsDataMap: ExportFormatDataMap = {
         header: 'Roboflow connection failed',
         description: 'Looks like we ware unable to connect to your Roboflow model. Please, make sure that the model ' +
             'specification and Roboflow API key, are correct.'
+    },
+    [Notification.NON_UNIQUE_LABEL_SHORTCUTS_ERROR]: {
+        header: 'Non unique label shortcuts',
+        description: 'Looks like some labels are sharing the same shortcut. Shortcuts must be unique when filled in.'
     }
 }

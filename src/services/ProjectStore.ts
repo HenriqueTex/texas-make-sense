@@ -1,5 +1,6 @@
 import {openDB, IDBPDatabase} from 'idb';
 import {ProjectType} from '../data/enums/ProjectType';
+import {ProjectData} from '../store/general/types';
 import {ImageData, LabelName} from '../store/labels/types';
 import {ProjectMeta} from '../store/projects/types';
 
@@ -21,6 +22,20 @@ export type StoredProject = {
     updatedAt: number;
     labels: LabelName[];
     images: StoredImageData[];
+}
+
+export function canPersistProject(projectData: ProjectData, imagesData: ImageData[]): boolean {
+    return Object.values(ProjectType).includes(projectData.type) && imagesData.length > 0;
+}
+
+export function isStoredProjectValid(project: StoredProject | undefined): project is StoredProject {
+    if (!project) return false;
+
+    const hasValidType = Object.values(ProjectType).includes(project.type);
+    const hasImages = Array.isArray(project.images) && project.images.length > 0;
+    const hasLabels = Array.isArray(project.labels);
+
+    return hasValidType && hasImages && hasLabels;
 }
 
 let dbPromise: Promise<IDBPDatabase> | null = null;

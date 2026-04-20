@@ -36,6 +36,7 @@ export type LabelLine = Annotation & {
 export type LabelName = {
     name: string;
     id: string;
+    shortcut?: string;
     color?: string;
 }
 
@@ -154,4 +155,3 @@ export type LabelsActionTypes = UpdateActiveImageIndex
     | UpdateActiveLabelId
     | UpdateHighlightedLabelId
     | UpdateFirstLabelCreatedFlag
-

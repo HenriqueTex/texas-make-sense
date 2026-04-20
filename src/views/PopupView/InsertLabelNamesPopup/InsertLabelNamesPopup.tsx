@@ -55,6 +55,14 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         return uniqueLabelNames.length === labelNames.length;
     };
 
+    const validateNonUniqueLabelShortcuts = (): boolean => {
+        const populatedShortcuts = labelNames
+            .map((labelName: LabelName) => (labelName.shortcut || '').trim())
+            .filter(Boolean);
+        const uniqueShortcuts = uniq(populatedShortcuts);
+        return uniqueShortcuts.length === populatedShortcuts.length;
+    };
+
     const callbackWithLabelNamesValidation = (callback: () => any): () => any => {
         return () => {
             if (!validateEmptyLabelNames()) {
@@ -63,7 +71,12 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                 return;
             }
             if (validateNonUniqueLabelNames()) {
-                callback();
+                if (validateNonUniqueLabelShortcuts()) {
+                    callback();
+                } else {
+                    submitNewNotificationAction(NotificationUtil
+                        .createErrorNotification(NotificationsDataMap[Notification.NON_UNIQUE_LABEL_SHORTCUTS_ERROR]));
+                }
             } else {
                 submitNewNotificationAction(NotificationUtil
                     .createErrorNotification(NotificationsDataMap[Notification.NON_UNIQUE_LABEL_NAMES_ERROR]));
@@ -112,9 +125,22 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         setLabelNames(newLabelNames);
     };
 
+    const onShortcutChange = (id: string, value: string) => {
+        const normalizedShortcut = value.slice(-1).toUpperCase();
+        const newLabelNames = labelNames.map((labelName: LabelName) => {
+            return labelName.id === id ? {
+                ...labelName,
+                shortcut: normalizedShortcut
+            } : labelName;
+        });
+        setLabelNames(newLabelNames);
+    };
+
     const labelInputs = labelNames.map((labelName: LabelName) => {
         const onChangeCallback = (event: React.ChangeEvent<HTMLInputElement>) =>
             onChange(labelName.id, event.target.value);
+        const onShortcutChangeCallback = (event: React.ChangeEvent<HTMLInputElement>) =>
+            onShortcutChange(labelName.id, event.target.value);
         const onDeleteCallback = () => deleteLabelNameCallback(labelName.id);
         const onChangeColorCallback = () => changeLabelNameColorCallback(labelName.id);
         return <div className='LabelEntry' key={labelName.id}>
@@ -129,6 +155,20 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                 value={labelName.name}
                 onChange={onChangeCallback}
                 style={{ width: 280 }}
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
+            <StyledTextField variant='standard'
+                id={'shortcut'}
+                autoComplete={'off'}
+                type={'text'}
+                margin={'dense'}
+                label={'Shortcut'}
+                value={labelName.shortcut || ''}
+                onChange={onShortcutChangeCallback}
+                inputProps={{ maxLength: 1 }}
+                style={{ width: 100 }}
                 InputLabelProps={{
                     shrink: true,
                 }}

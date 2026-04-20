@@ -2,6 +2,7 @@ import React, {PropsWithChildren} from 'react';
 import './ImagesDropZone.scss';
 import {useDropzone,DropzoneOptions} from 'react-dropzone';
 import {TextButton} from '../../Common/TextButton/TextButton';
+import TextInput from '../../Common/TextInput/TextInput';
 import {ImageData} from '../../../store/labels/types';
 import {connect} from 'react-redux';
 import {addImageData, updateActiveImageIndex} from '../../../store/labels/actionCreators';
@@ -29,19 +30,27 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
             'image/*': ['.jpeg', '.png']
         }
     } as DropzoneOptions);
+    const hasProjectName = props.projectData.name.trim().length > 0;
+
+    const onProjectNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        props.updateProjectDataAction({
+            ...props.projectData,
+            name: event.target.value
+        });
+    };
 
     const startEditor = (projectType: ProjectType) => {
-        if (acceptedFiles.length > 0) {
+        if (acceptedFiles.length > 0 && hasProjectName) {
             const files = sortBy(acceptedFiles, (item: File) => item.name);
             const projectId = crypto.randomUUID();
+            props.updateActiveImageIndexAction(0);
+            props.addImageDataAction(files.map((file:File) => ImageDataUtil
+                .createImageDataFromFileData(file)));
             props.updateActiveProjectIdAction(projectId);
             props.updateProjectDataAction({
                 ...props.projectData,
                 type: projectType
             });
-            props.updateActiveImageIndexAction(0);
-            props.addImageDataAction(files.map((file:File) => ImageDataUtil
-                .createImageDataFromFileData(file)));
             props.updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
         }
     };
@@ -86,18 +95,26 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
 
     return(
         <div className='ImagesDropZone'>
+            <div className='ProjectNameInputWrapper'>
+                <div className='ProjectNameInputLabel'>Project Name</div>
+                <TextInput
+                    isPassword={false}
+                    value={props.projectData.name}
+                    onChange={onProjectNameChange}
+                />
+            </div>
             <div {...getRootProps({className: 'DropZone'})}>
                 {getDropZoneContent()}
             </div>
             <div className='DropZoneButtons'>
                 <TextButton
                     label={'Object Detection'}
-                    isDisabled={!acceptedFiles.length}
+                    isDisabled={!acceptedFiles.length || !hasProjectName}
                     onClick={startEditorWithObjectDetection}
                 />
                 <TextButton
                     label={'Image recognition'}
-                    isDisabled={!acceptedFiles.length}
+                    isDisabled={!acceptedFiles.length || !hasProjectName}
                     onClick={startEditorWithImageRecognition}
                 />
             </div>

@@ -14,6 +14,7 @@ import { LabelType } from '../../../data/enums/LabelType';
 import { AISelector } from '../../../store/selectors/AISelector';
 import { ISize } from '../../../interfaces/ISize';
 import { AIActions } from '../../../logic/actions/AIActions';
+import { LabelActions } from '../../../logic/actions/LabelActions';
 import { Fade, styled, Tooltip, tooltipClasses, TooltipProps } from '@mui/material';
 const BUTTON_SIZE: ISize = { width: 30, height: 30 };
 const BUTTON_PADDING: number = 10;
@@ -37,6 +38,7 @@ const getButtonWithTooltip = (
     imageSrc: string,
     imageAlt: string,
     isActive: boolean,
+    isDisabled?: boolean,
     href?: string,
     onClick?: () => any
 ): React.ReactElement => {
@@ -57,6 +59,7 @@ const getButtonWithTooltip = (
                 href={href}
                 onClick={onClick}
                 isActive={isActive}
+                isDisabled={isDisabled}
             />
         </div>
     </StyledTooltip>;
@@ -69,6 +72,7 @@ interface IProps {
     imageDragMode: boolean;
     crossHairVisible: boolean;
     activeLabelType: LabelType;
+    activeImageIndex: number;
 }
 
 const EditorTopNavigationBar: React.FC<IProps> = (
@@ -78,7 +82,8 @@ const EditorTopNavigationBar: React.FC<IProps> = (
         updateCrossHairVisibleStatusAction,
         imageDragMode,
         crossHairVisible,
-        activeLabelType
+        activeLabelType,
+        activeImageIndex
     }) => {
     const getClassName = () => {
         return classNames(
@@ -119,6 +124,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         'ico/zoom-in.png',
                         'zoom-in',
                         false,
+                        false,
                         undefined,
                         () => ViewPortActions.zoomIn()
                     )
@@ -129,6 +135,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         'zoom out',
                         'ico/zoom-out.png',
                         'zoom-out',
+                        false,
                         false,
                         undefined,
                         () => ViewPortActions.zoomOut()
@@ -141,6 +148,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         'ico/zoom-fit.png',
                         'zoom-fit',
                         false,
+                        false,
                         undefined,
                         () => ViewPortActions.setDefaultZoom()
                     )
@@ -151,6 +159,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         'maximum allowed image zoom',
                         'ico/zoom-max.png',
                         'zoom-max',
+                        false,
                         false,
                         undefined,
                         () => ViewPortActions.setOneForOneZoom()
@@ -165,6 +174,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         'ico/hand.png',
                         'image-drag-mode',
                         imageDragMode,
+                        false,
                         undefined,
                         imageDragOnClick
                     )
@@ -176,8 +186,21 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         'ico/cross-hair.png',
                         'cross-hair',
                         crossHairVisible,
+                        false,
                         undefined,
                         crossHairOnClick
+                    )
+                }
+                {
+                    getButtonWithTooltip(
+                        'reapply-previous-labels',
+                        'reapply labels from the previous image',
+                        'ico/refresh.png',
+                        'reapply-previous-labels',
+                        false,
+                        activeImageIndex <= 0,
+                        undefined,
+                        () => activeImageIndex > 0 && LabelActions.reapplyLabelsFromPreviousImage()
                     )
                 }
             </div>
@@ -189,6 +212,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                             'ico/accept-all.png',
                             'accept-all',
                             false,
+                            false,
                             undefined,
                             () => AIActions.acceptAllSuggestedLabels(LabelsSelector.getActiveImageData())
                         )
@@ -199,6 +223,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                             'reject all proposed detections',
                             'ico/reject-all.png',
                             'reject-all',
+                            false,
                             false,
                             undefined,
                             () => AIActions.rejectAllSuggestedLabels(LabelsSelector.getActiveImageData())
@@ -218,7 +243,8 @@ const mapStateToProps = (state: AppState) => ({
     activeContext: state.general.activeContext,
     imageDragMode: state.general.imageDragMode,
     crossHairVisible: state.general.crossHairVisible,
-    activeLabelType: state.labels.activeLabelType
+    activeLabelType: state.labels.activeLabelType,
+    activeImageIndex: state.labels.activeImageIndex
 });
 
 export default connect(

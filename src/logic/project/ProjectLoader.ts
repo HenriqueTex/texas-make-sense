@@ -1,5 +1,7 @@
 import {store} from '../..';
 import {updateProjectData} from '../../store/general/actionCreators';
+import {NotificationType} from '../../data/enums/NotificationType';
+import {submitNewNotification} from '../../store/notifications/actionCreators';
 import {
     updateImageData,
     updateLabelNames,
@@ -10,12 +12,25 @@ import {
     updateActiveLabelId,
     updateFirstLabelCreatedFlag
 } from '../../store/labels/actionCreators';
-import {updateActiveProjectId, updateProjectList, updateSaveStatus} from '../../store/projects/actionCreators';
-import {deserializeImageData, listProjects, loadProject, saveProject, serializeImageData, StoredProject} from '../../services/ProjectStore';
+import {updateActiveProjectId, updateProjectList, updateSaveStatus, setProjectLoading} from '../../store/projects/actionCreators';
+import {canPersistProject, deserializeImageData, isStoredProjectValid, listProjects, loadProject, saveProject, serializeImageData, StoredProject} from '../../services/ProjectStore';
 
 export async function openProject(projectId: string): Promise<boolean> {
     const stored = await loadProject(projectId);
-    if (!stored) return false;
+    if (!isStoredProjectValid(stored)) {
+        store.dispatch(submitNewNotification({
+            id: `invalid-project-${projectId}`,
+            type: NotificationType.ERROR,
+            header: 'Project could not be opened',
+            description: 'The saved project data is incomplete or invalid in local storage.'
+        }));
+        return false;
+    }
+
+    // Block autosave while we dispatch multiple actions that transition the store
+    // from one project to another — prevents saving a partial/empty snapshot
+    // which would corrupt the project and cause a black screen on next open.
+    store.dispatch(setProjectLoading(true));
 
     // Reset all transient UI state before loading new project
     store.dispatch(updateActiveLabelNameId(null));
@@ -25,11 +40,14 @@ export async function openProject(projectId: string): Promise<boolean> {
     store.dispatch(updateFirstLabelCreatedFlag(false));
 
     store.dispatch(updateSaveStatus('saved'));
-    store.dispatch(updateActiveProjectId(stored.id));
-    store.dispatch(updateProjectData({name: stored.name, type: stored.type}));
     store.dispatch(updateLabelNames(stored.labels));
     store.dispatch(updateImageData(stored.images.map(deserializeImageData)));
     store.dispatch(updateActiveImageIndex(0));
+    store.dispatch(updateActiveProjectId(stored.id));
+    store.dispatch(updateProjectData({name: stored.name, type: stored.type}));
+
+    // All state is now consistent — allow autosave again
+    store.dispatch(setProjectLoading(false));
 
     return true;
 }
@@ -42,6 +60,7 @@ export async function saveProjectNow(): Promise<void> {
     const {projectList} = state.projects;
     const {projectData} = state.general;
     const {imagesData, labels} = state.labels;
+    if (!canPersistProject(projectData, imagesData)) return;
 
     const existingMeta = projectList.find(p => p.id === activeProjectId);
     const project: StoredProject = {

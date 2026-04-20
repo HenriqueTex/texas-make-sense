@@ -145,13 +145,14 @@
         justify-content: flex-start;
         align-items: center;
         align-content: space-between;
+        gap: 12px;
 
         .ColorSelectorView {
-          margin-left: 15px;
+          margin-left: 0;
         }
 
         .ImageButton {
-          margin-left: 15px;
+          margin-left: 0;
 
           img {
             filter: brightness(0) invert(1);

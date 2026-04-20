@@ -12,12 +12,15 @@ export function useAutoSave() {
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const activeProjectId = useSelector((s: AppState) => s.projects.activeProjectId);
+    const isLoadingProject = useSelector((s: AppState) => s.projects.isLoadingProject);
     const projectData = useSelector((s: AppState) => s.general.projectData);
     const imagesData = useSelector((s: AppState) => s.labels.imagesData);
     const labels = useSelector((s: AppState) => s.labels.labels);
 
     useEffect(() => {
-        if (!activeProjectId) return undefined;
+        // Don't react while openProject is dispatching multiple actions —
+        // the store is in a transitional (potentially empty) state during load.
+        if (!activeProjectId || isLoadingProject) return undefined;
 
         dispatch(updateSaveStatus('unsaved'));
 
@@ -27,5 +30,6 @@ export function useAutoSave() {
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);
         };
-    }, [activeProjectId, projectData, imagesData, labels, dispatch, save]);
+    }, [activeProjectId, isLoadingProject, projectData, imagesData, labels, dispatch, save]);
 }
+

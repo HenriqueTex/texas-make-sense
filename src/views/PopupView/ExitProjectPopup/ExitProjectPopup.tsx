@@ -58,6 +58,10 @@ const ExitProjectPopup: React.FC<IProps> = ({
         } catch {
             // Exit anyway even if save fails
         }
+        // Close the popup FIRST so it is no longer visible while the store
+        // resets — otherwise the popup with isSaving=true bleeds into the
+        // main screen and leaves the UI with disabled buttons.
+        PopupActions.close();
         updateActiveLabelNameId(null);
         updateLabelNames([]);
         updateProjectData({type: null, name: 'my-project-name'});
@@ -65,7 +69,6 @@ const ExitProjectPopup: React.FC<IProps> = ({
         updateImageData([]);
         updateFirstLabelCreatedFlag(false);
         updateActiveProjectId(null);
-        PopupActions.close();
     };
 
     const onReject = () => {

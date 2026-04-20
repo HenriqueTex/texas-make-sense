@@ -2,9 +2,11 @@ import {LabelsSelector} from '../../store/selectors/LabelsSelector';
 import {ImageData, LabelLine, LabelName, LabelPoint, LabelPolygon, LabelRect} from '../../store/labels/types';
 import {filter} from 'lodash';
 import {store} from '../../index';
-import {updateImageData, updateImageDataById} from '../../store/labels/actionCreators';
+import {updateActiveLabelId, updateHighlightedLabelId, updateImageData, updateImageDataById} from '../../store/labels/actionCreators';
 import {LabelType} from '../../data/enums/LabelType';
 import {LabelUtil} from '../../utils/LabelUtil';
+import {LabelStatus} from '../../data/enums/LabelStatus';
+import {v4 as uuidv4} from 'uuid';
 
 export class LabelActions {
     public static deleteActiveLabel() {
@@ -143,5 +145,50 @@ export class LabelActions {
         return labelNames
             .map((labelName: LabelName) => labelName.name)
             .includes(label)
+    }
+
+    public static reapplyLabelsFromPreviousImage(): void {
+        const activeImageIndex = LabelsSelector.getActiveImageIndex();
+        if (activeImageIndex === null || activeImageIndex <= 0) {
+            return;
+        }
+
+        const currentImageData = LabelsSelector.getImageDataByIndex(activeImageIndex);
+        const previousImageData = LabelsSelector.getImageDataByIndex(activeImageIndex - 1);
+
+        const nextImageData: ImageData = {
+            ...currentImageData,
+            labelRects: previousImageData.labelRects
+                .filter((labelRect: LabelRect) => labelRect.status === LabelStatus.ACCEPTED)
+                .map((labelRect: LabelRect) => ({
+                    ...labelRect,
+                    id: uuidv4(),
+                    isCreatedByAI: false,
+                    status: LabelStatus.ACCEPTED,
+                    suggestedLabel: null
+                })),
+            labelPoints: previousImageData.labelPoints
+                .filter((labelPoint: LabelPoint) => labelPoint.status === LabelStatus.ACCEPTED)
+                .map((labelPoint: LabelPoint) => ({
+                    ...labelPoint,
+                    id: uuidv4(),
+                    isCreatedByAI: false,
+                    status: LabelStatus.ACCEPTED,
+                    suggestedLabel: null
+                })),
+            labelLines: previousImageData.labelLines.map((labelLine: LabelLine) => ({
+                ...labelLine,
+                id: uuidv4()
+            })),
+            labelPolygons: previousImageData.labelPolygons.map((labelPolygon: LabelPolygon) => ({
+                ...labelPolygon,
+                id: uuidv4()
+            })),
+            labelNameIds: [...previousImageData.labelNameIds]
+        };
+
+        store.dispatch(updateActiveLabelId(null));
+        store.dispatch(updateHighlightedLabelId(null));
+        store.dispatch(updateImageDataById(currentImageData.id, nextImageData));
     }
 }

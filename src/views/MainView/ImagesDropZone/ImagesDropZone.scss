@@ -6,6 +6,24 @@
   justify-content: center;
   align-items: center;
 
+  .ProjectNameInputWrapper {
+    width: 400px;
+    margin-bottom: 20px;
+
+    .ProjectNameInputLabel {
+      margin-bottom: 8px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .TextInput {
+      width: 100%;
+    }
+  }
+
   .DropZone {
     user-select: none;
     width: 400px;

@@ -68,14 +68,14 @@ export class EditorContext extends BaseContext {
             keyCombo: ["ArrowRight"],
             action: (event: KeyboardEvent) => {
                 event.preventDefault();
-                ViewPortActions.translateViewPortPosition(Direction.RIGHT);
+                ImageActions.getNextImage();
             }
         },
         {
             keyCombo: ["ArrowLeft"],
             action: (event: KeyboardEvent) => {
                 event.preventDefault();
-                ViewPortActions.translateViewPortPosition(Direction.LEFT);
+                ImageActions.getPreviousImage();
             }
         },
         {

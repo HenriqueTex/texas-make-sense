@@ -15,6 +15,13 @@ export function updateActiveProjectId(activeProjectId: string | null): ProjectsA
     };
 }
 
+export function setProjectLoading(isLoadingProject: boolean): ProjectsActionTypes {
+    return {
+        type: Action.SET_PROJECT_LOADING,
+        payload: {isLoadingProject}
+    };
+}
+
 export function updateSaveStatus(saveStatus: SaveStatus): ProjectsActionTypes {
     return {
         type: Action.UPDATE_SAVE_STATUS,

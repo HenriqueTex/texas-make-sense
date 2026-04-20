@@ -93,6 +93,7 @@ const RectLabelsList: React.FC<IProps> = (
                     isActive={labelRect.id === activeLabelId}
                     isHighlighted={labelRect.id === highlightedLabelId}
                     isVisible={labelRect.isVisible}
+                    showShortcutBeforeMarker={true}
                     id={labelRect.id}
                     key={labelRect.id}
                     onDelete={deleteRectLabelById}

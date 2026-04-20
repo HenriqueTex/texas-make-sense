@@ -4,7 +4,8 @@ import {ProjectsActionTypes, ProjectsState} from './types';
 const initialState: ProjectsState = {
     projectList: [],
     activeProjectId: null,
-    saveStatus: 'idle'
+    saveStatus: 'idle',
+    isLoadingProject: false
 };
 
 export function projectsReducer(
@@ -23,6 +24,8 @@ export function projectsReducer(
             };
         case Action.UPDATE_SAVE_STATUS:
             return {...state, saveStatus: action.payload.saveStatus};
+        case Action.SET_PROJECT_LOADING:
+            return {...state, isLoadingProject: action.payload.isLoadingProject};
         default:
             return state;
     }

@@ -16,6 +16,7 @@ export type ProjectsState = {
     projectList: ProjectMeta[];
     activeProjectId: string | null;
     saveStatus: SaveStatus;
+    isLoadingProject: boolean;
 }
 
 interface UpdateProjectList {
@@ -39,4 +40,11 @@ interface UpdateSaveStatus {
     }
 }
 
-export type ProjectsActionTypes = UpdateProjectList | UpdateActiveProjectId | UpdateSaveStatus;
+interface SetProjectLoading {
+    type: typeof Action.SET_PROJECT_LOADING;
+    payload: {
+        isLoadingProject: boolean;
+    }
+}
+
+export type ProjectsActionTypes = UpdateProjectList | UpdateActiveProjectId | UpdateSaveStatus | SetProjectLoading;

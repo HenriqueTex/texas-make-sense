@@ -19,15 +19,18 @@ import {ContextType} from "../../../../data/enums/ContextType";
 import {EventType} from "../../../../data/enums/EventType";
 import LineLabelsList from "../LineLabelsList/LineLabelsList";
 import TagLabelsList from "../TagLabelsList/TagLabelsList";
+import {updateCategorizationModeStatus} from "../../../../store/general/actionCreators";
 
 interface IProps {
     activeImageIndex:number,
     activeLabelType: LabelType;
+    categorizationMode: boolean;
     imagesData: ImageData[];
     projectType: ProjectType;
     updateImageDataById: (id: string, newImageData: ImageData) => any;
     updateActiveLabelType: (activeLabelType: LabelType) => any;
     updateActiveLabelId: (highlightedLabelId: string) => any;
+    updateCategorizationModeStatus: (categorizationMode: boolean) => any;
 }
 
 interface IState {
@@ -67,6 +70,16 @@ class LabelsToolkit extends React.Component<IProps, IState> {
 
     public componentWillUnmount(): void {
         window.removeEventListener(EventType.RESIZE, this.updateToolkitSize);
+    }
+
+    public componentDidUpdate(prevProps: IProps): void {
+        if (
+            this.props.categorizationMode &&
+            prevProps.activeLabelType !== this.props.activeLabelType &&
+            this.props.activeLabelType === LabelType.IMAGE_RECOGNITION
+        ) {
+            this.props.updateCategorizationModeStatus(false);
+        }
     }
 
     private updateToolkitSize = () => {
@@ -192,12 +205,14 @@ class LabelsToolkit extends React.Component<IProps, IState> {
 const mapDispatchToProps = {
     updateImageDataById,
     updateActiveLabelType,
-    updateActiveLabelId
+    updateActiveLabelId,
+    updateCategorizationModeStatus
 };
 
 const mapStateToProps = (state: AppState) => ({
     activeImageIndex: state.labels.activeImageIndex,
     activeLabelType: state.labels.activeLabelType,
+    categorizationMode: state.general.categorizationMode,
     imagesData: state.labels.imagesData,
     projectType: state.general.projectData.type,
 });

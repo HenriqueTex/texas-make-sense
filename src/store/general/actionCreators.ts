@@ -68,6 +68,15 @@ export function updateCrossHairVisibleStatus(crossHairVisible: boolean): General
     };
 }
 
+export function updateCategorizationModeStatus(categorizationMode: boolean): GeneralActionTypes {
+    return {
+        type: Action.UPDATE_CATEGORIZATION_MODE_STATUS,
+        payload: {
+            categorizationMode,
+        },
+    };
+}
+
 export function updateProjectData(projectData: ProjectData): GeneralActionTypes {
     return {
         type: Action.UPDATE_PROJECT_DATA,

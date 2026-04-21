@@ -65,6 +65,10 @@ export class RectUtil {
     public static resizeRect(inputRect: IRect, rectAnchor: Direction, delta): IRect {
         const rect: IRect = {...inputRect};
         switch (rectAnchor) {
+            case Direction.CENTER:
+                rect.x += delta.x;
+                rect.y += delta.y;
+                break;
             case Direction.RIGHT:
                 rect.width += delta.x;
                 break;
@@ -122,6 +126,18 @@ export class RectUtil {
         }
     }
 
+    public static constrainInsideBounds(rect: IRect, bounds: IRect): IRect {
+        const constrainedWidth = Math.min(rect.width, bounds.width);
+        const constrainedHeight = Math.min(rect.height, bounds.height);
+
+        return {
+            x: NumberUtil.snapValueToRange(rect.x, bounds.x, bounds.x + bounds.width - constrainedWidth),
+            y: NumberUtil.snapValueToRange(rect.y, bounds.y, bounds.y + bounds.height - constrainedHeight),
+            width: constrainedWidth,
+            height: constrainedHeight
+        }
+    }
+
     public static expand(rect: IRect, delta: IPoint): IRect {
         return {
             x: rect.x - delta.x,
@@ -146,6 +162,7 @@ export class RectUtil {
             {type: Direction.TOP, position: {x: rect.x + 0.5 * rect.width, y: rect.y}},
             {type: Direction.TOP_RIGHT, position: {x: rect.x + rect.width, y: rect.y}},
             {type: Direction.LEFT, position: {x: rect.x, y: rect.y + 0.5 * rect.height}},
+            {type: Direction.CENTER, position: {x: rect.x + 0.5 * rect.width, y: rect.y + 0.5 * rect.height}},
             {type: Direction.RIGHT, position: {x: rect.x + rect.width, y: rect.y + 0.5 * rect.height}},
             {type: Direction.BOTTOM_LEFT, position: {x: rect.x, y: rect.y + rect.height}},
             {type: Direction.BOTTOM, position: {x: rect.x + 0.5 * rect.width, y: rect.y + rect.height}},
@@ -186,5 +203,3 @@ export class RectUtil {
         ]
     }
 }
-
-

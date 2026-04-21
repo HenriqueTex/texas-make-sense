@@ -14,7 +14,7 @@ import {connect} from 'react-redux';
 import {ImageData, LabelName} from '../../../store/labels/types';
 import {PopupActions} from '../../../logic/actions/PopupActions';
 import {ProjectData} from '../../../store/general/types';
-import {updateProjectData as storeUpdateProjectData} from '../../../store/general/actionCreators';
+import {updateCategorizationModeStatus as storeUpdateCategorizationModeStatus, updateProjectData as storeUpdateProjectData} from '../../../store/general/actionCreators';
 import {updateActiveProjectId as storeUpdateActiveProjectId} from '../../../store/projects/actionCreators';
 import {saveProjectNow} from '../../../logic/project/ProjectLoader';
 
@@ -22,10 +22,11 @@ interface IProps {
     updateActiveImageIndex: (activeImageIndex: number) => any;
     updateActiveLabelNameId: (activeLabelId: string) => any;
     clearLabelsHistory: () => any;
-    updateLabelNames: (labelNames: LabelName[]) => any;
-    updateImageData: (imageData: ImageData[]) => any;
+    updateLabelNames: (labelNames: LabelName[], undoable?: boolean) => any;
+    updateImageData: (imageData: ImageData[], undoable?: boolean) => any;
     updateFirstLabelCreatedFlag: (firstLabelCreatedFlag: boolean) => any;
     updateProjectData: (projectData: ProjectData) => any;
+    updateCategorizationModeStatus: (categorizationMode: boolean) => any;
     updateActiveProjectId: (id: string | null) => any;
 }
 
@@ -37,6 +38,7 @@ const ExitProjectPopup: React.FC<IProps> = ({
     updateImageData,
     updateFirstLabelCreatedFlag,
     updateProjectData,
+    updateCategorizationModeStatus,
     updateActiveProjectId
 }: IProps) => {
     const [isSaving, setIsSaving] = useState(false);
@@ -69,6 +71,7 @@ const ExitProjectPopup: React.FC<IProps> = ({
         updateActiveLabelNameId(null);
         updateLabelNames([], false);
         updateProjectData({type: null, name: 'my-project-name'});
+        updateCategorizationModeStatus(false);
         updateActiveImageIndex(null);
         updateImageData([], false);
         updateFirstLabelCreatedFlag(false);
@@ -98,6 +101,7 @@ const mapDispatchToProps = {
     clearLabelsHistory: storeClearLabelsHistory,
     updateLabelNames: storeUpdateLabelNames,
     updateProjectData: storeUpdateProjectData,
+    updateCategorizationModeStatus: storeUpdateCategorizationModeStatus,
     updateActiveImageIndex: storeUpdateActiveImageIndex,
     updateImageData: storeUpdateImageData,
     updateFirstLabelCreatedFlag: storeUpdateFirstLabelCreatedFlag,

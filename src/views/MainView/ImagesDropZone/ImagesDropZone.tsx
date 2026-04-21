@@ -9,7 +9,7 @@ import {addImageData, clearLabelsHistory, updateActiveImageIndex} from '../../..
 import {AppState} from '../../../store';
 import {ProjectType} from '../../../data/enums/ProjectType';
 import {PopupWindowType} from '../../../data/enums/PopupWindowType';
-import {updateActivePopupType, updateProjectData} from '../../../store/general/actionCreators';
+import {updateActivePopupType, updateCategorizationModeStatus, updateProjectData} from '../../../store/general/actionCreators';
 import {ProjectData} from '../../../store/general/types';
 import {ImageDataUtil} from '../../../utils/ImageDataUtil';
 import {updateActiveProjectId} from '../../../store/projects/actionCreators';
@@ -20,6 +20,7 @@ interface IProps {
     clearLabelsHistoryAction: () => any;
     addImageDataAction: (imageData: ImageData[]) => any;
     updateProjectDataAction: (projectData: ProjectData) => any;
+    updateCategorizationModeStatusAction: (categorizationMode: boolean) => any;
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
     updateActiveProjectIdAction: (id: string | null) => any;
     projectData: ProjectData;
@@ -46,6 +47,7 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
             const projectId = crypto.randomUUID();
             props.clearLabelsHistoryAction();
             props.updateActiveImageIndexAction(0);
+            props.updateCategorizationModeStatusAction(false);
             props.addImageDataAction(files.map((file:File) => ImageDataUtil
                 .createImageDataFromFileData(file)));
             props.updateActiveProjectIdAction(projectId);
@@ -129,6 +131,7 @@ const mapDispatchToProps = {
     clearLabelsHistoryAction: clearLabelsHistory,
     addImageDataAction: addImageData,
     updateProjectDataAction: updateProjectData,
+    updateCategorizationModeStatusAction: updateCategorizationModeStatus,
     updateActivePopupTypeAction: updateActivePopupType,
     updateActiveProjectIdAction: updateActiveProjectId
 };

@@ -11,6 +11,7 @@ const initialState: GeneralState = {
     preventCustomCursor: false,
     imageDragMode: false,
     crossHairVisible: true,
+    categorizationMode: false,
     enablePerClassColoration: true,
     projectData: {
         type: null,
@@ -64,6 +65,12 @@ export function generalReducer(
             return {
                 ...state,
                 crossHairVisible: action.payload.crossHairVisible
+            }
+        }
+        case Action.UPDATE_CATEGORIZATION_MODE_STATUS: {
+            return {
+                ...state,
+                categorizationMode: action.payload.categorizationMode
             }
         }
         case Action.UPDATE_PROJECT_DATA: {

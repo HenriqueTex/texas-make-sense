@@ -73,6 +73,7 @@ interface IProps {
     updateCrossHairVisibleStatusAction: (crossHairVisible: boolean) => any;
     imageDragMode: boolean;
     crossHairVisible: boolean;
+    categorizationMode: boolean;
     activeLabelType: LabelType;
     activeImageIndex: number;
     activeProjectId: string | null;
@@ -86,6 +87,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
         updateCrossHairVisibleStatusAction,
         imageDragMode,
         crossHairVisible,
+        categorizationMode,
         activeLabelType,
         activeImageIndex,
         activeProjectId,
@@ -119,6 +121,7 @@ const EditorTopNavigationBar: React.FC<IProps> = (
         (activeLabelType === LabelType.RECT && AISelector.isRoboflowAPIModelLoaded()) ||
         (activeLabelType === LabelType.POINT && AISelector.isAIPoseDetectorModelLoaded())
     )
+    const categorizationSupported = activeLabelType !== LabelType.IMAGE_RECOGNITION;
 
     return (
         <div className={getClassName()}>
@@ -195,6 +198,18 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         false,
                         undefined,
                         crossHairOnClick
+                    )
+                }
+                {
+                    getButtonWithTooltip(
+                        'categorization-mode',
+                        'categorize vectors by shortcut and advance automatically. Use Shift + ArrowUp to copy the previous image labels to the current vectors.',
+                        'ico/type-writer.png',
+                        'categorization-mode',
+                        categorizationMode,
+                        !categorizationSupported,
+                        undefined,
+                        () => categorizationSupported && LabelActions.toggleCategorizationMode()
                     )
                 }
                 {
@@ -290,6 +305,7 @@ const mapStateToProps = (state: AppState) => ({
     activeContext: state.general.activeContext,
     imageDragMode: state.general.imageDragMode,
     crossHairVisible: state.general.crossHairVisible,
+    categorizationMode: state.general.categorizationMode,
     activeLabelType: state.labels.activeLabelType,
     activeImageIndex: state.labels.activeImageIndex,
     activeProjectId: state.projects.activeProjectId,

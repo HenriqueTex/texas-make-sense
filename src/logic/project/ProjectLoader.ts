@@ -1,5 +1,5 @@
 import {store} from '../..';
-import {updateProjectData} from '../../store/general/actionCreators';
+import {updateCategorizationModeStatus, updateProjectData} from '../../store/general/actionCreators';
 import {NotificationType} from '../../data/enums/NotificationType';
 import {submitNewNotification} from '../../store/notifications/actionCreators';
 import {
@@ -40,6 +40,7 @@ export async function openProject(projectId: string): Promise<boolean> {
     store.dispatch(updateActiveLabelId(null));
     store.dispatch(updateHighlightedLabelId(null));
     store.dispatch(updateFirstLabelCreatedFlag(false));
+    store.dispatch(updateCategorizationModeStatus(false));
 
     store.dispatch(updateSaveStatus('saved'));
     store.dispatch(updateLabelNames(stored.labels, false));

@@ -12,6 +12,12 @@ import {PlatformUtil} from "../../utils/PlatformUtil";
 import {LabelActions} from "../actions/LabelActions";
 import {LineRenderEngine} from "../render/LineRenderEngine";
 
+const categorizationShortcutKeys = [
+    ..."abcdefghijklmnopqrstuvwxyz",
+    ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    ..."0123456789"
+];
+
 export class EditorContext extends BaseContext {
     public static actions: HotKeyAction[] = [
         {
@@ -175,6 +181,24 @@ export class EditorContext extends BaseContext {
                 ImageActions.setActiveLabelOnActiveImage(9);
                 EditorActions.fullRender();
             }
-        }
+        },
+        {
+            keyCombo: ["Shift", "ArrowUp"],
+            action: (event: KeyboardEvent) => {
+                event.preventDefault();
+                LabelActions.applyCurrentImageLabelsFromPreviousImage();
+                EditorActions.fullRender();
+            }
+        },
+        ...categorizationShortcutKeys.map((shortcutKey: string) => ({
+            keyCombo: [shortcutKey],
+            action: (event: KeyboardEvent) => {
+                const handled = LabelActions.applyShortcutToCategorization(shortcutKey);
+                if (handled) {
+                    event.preventDefault();
+                    EditorActions.fullRender();
+                }
+            }
+        }))
     ];
 }

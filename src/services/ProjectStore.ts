@@ -3,6 +3,7 @@ import {ProjectType} from '../data/enums/ProjectType';
 import {ProjectData} from '../store/general/types';
 import {ImageData, LabelName} from '../store/labels/types';
 import {ProjectMeta} from '../store/projects/types';
+import axios from 'axios';
 
 const DB_NAME = 'make-sense-db';
 const DB_VERSION = 2;
@@ -57,7 +58,7 @@ function getDB(): Promise<IDBPDatabase> {
                             const meta: ProjectMeta = {
                                 id: p.id, name: p.name, type: p.type,
                                 createdAt: p.createdAt, updatedAt: p.updatedAt,
-                                imageCount: p.images.length
+                                imageCount: p.images ? p.images.length : 0
                             };
                             tx.objectStore(PROJECTS_META_STORE).put(meta);
                             cursor = await cursor.continue();
@@ -80,7 +81,7 @@ export async function saveProject(project: StoredProject): Promise<void> {
         type: project.type,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
-        imageCount: project.images.length
+        imageCount: project.images ? project.images.length : 0
     };
     const tx = db.transaction([PROJECTS_STORE, PROJECTS_META_STORE], 'readwrite');
     await Promise.all([
@@ -88,6 +89,46 @@ export async function saveProject(project: StoredProject): Promise<void> {
         tx.objectStore(PROJECTS_META_STORE).put(meta),
         tx.done
     ]);
+
+    try {
+        await syncProjectToBackend(project, false);
+    } catch (err) {
+        console.warn("Could not sync to Active Learning Backend (is the server running?)", err);
+    }
+}
+
+export async function syncProjectToBackend(project: StoredProject, waitForImageUploads: boolean = false): Promise<void> {
+    const syncData = {
+        id: project.id,
+        name: project.name,
+        type: project.type,
+        labels: project.labels,
+        imagesMetadata: project.images.map(img => ({
+            id: img.id,
+            fileName: img.fileName,
+            labelRects: img.labelRects,
+            labelPoints: img.labelPoints,
+            labelPolygons: img.labelPolygons,
+            labelLines: img.labelLines
+        }))
+    };
+
+    await axios.post(`http://localhost:8000/api/projects/${project.id}/sync`, syncData, {timeout: 3000});
+
+    const uploadRequests = project.images
+        .filter((img) => !!img.fileBlob)
+        .map((img) => {
+            const formData = new FormData();
+            formData.append('file', img.fileBlob, img.fileName);
+            formData.append('image_id', img.id);
+            return axios.post(`http://localhost:8000/api/projects/${project.id}/upload_image`, formData, {timeout: 10000});
+        });
+
+    if (waitForImageUploads) {
+        await Promise.all(uploadRequests);
+    } else {
+        uploadRequests.forEach((request) => request.catch(() => undefined));
+    }
 }
 
 export async function loadProject(id: string): Promise<StoredProject | undefined> {
@@ -122,7 +163,7 @@ export function serializeImageData(imageData: ImageData): StoredImageData {
 
 export function deserializeImageData(stored: StoredImageData): ImageData {
     const {fileName, fileBlob, ...rest} = stored;
-    const file = new File([fileBlob], fileName, {type: fileBlob.type});
+    const file = fileBlob ? new File([fileBlob], fileName, {type: fileBlob.type}) : new File([], fileName);
     return {
         ...rest,
         fileData: file,

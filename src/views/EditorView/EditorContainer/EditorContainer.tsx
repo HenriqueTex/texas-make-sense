@@ -100,6 +100,8 @@ const EditorContainer: React.FC<IProps> = (
         return <LabelsToolkit/>
     };
 
+    const currentImageData = imagesData[activeImageIndex];
+
     return (
         <div className='EditorContainer'>
             <SideNavigationBar
@@ -117,17 +119,17 @@ const EditorContainer: React.FC<IProps> = (
                 {projectType === ProjectType.OBJECT_DETECTION && <EditorTopNavigationBar
                     key='editor-top-navigation-bar'
                 />}
-                <Editor
+                {currentImageData && <Editor
                     size={calculateEditorSize()}
-                    imageData={imagesData[activeImageIndex]}
+                    imageData={currentImageData}
                     key='editor'
-                />
-                <EditorBottomNavigationBar
-                    imageData={imagesData[activeImageIndex]}
+                />}
+                {currentImageData && <EditorBottomNavigationBar
+                    imageData={currentImageData}
                     size={calculateEditorSize()}
                     totalImageCount={imagesData.length}
                     key='editor-bottom-navigation-bar'
-                />
+                />}
             </div>
             <SideNavigationBar
                 direction={Direction.RIGHT}

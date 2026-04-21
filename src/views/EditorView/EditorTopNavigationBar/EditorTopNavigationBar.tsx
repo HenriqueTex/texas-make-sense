@@ -14,7 +14,9 @@ import { LabelType } from '../../../data/enums/LabelType';
 import { AISelector } from '../../../store/selectors/AISelector';
 import { ISize } from '../../../interfaces/ISize';
 import { AIActions } from '../../../logic/actions/AIActions';
+import { AIActiveLearningActions } from '../../../logic/actions/AIActiveLearningActions';
 import { LabelActions } from '../../../logic/actions/LabelActions';
+import { ImageSimilarityActions } from '../../../logic/actions/ImageSimilarityActions';
 import { Fade, styled, Tooltip, tooltipClasses, TooltipProps } from '@mui/material';
 const BUTTON_SIZE: ISize = { width: 30, height: 30 };
 const BUTTON_PADDING: number = 10;
@@ -73,6 +75,8 @@ interface IProps {
     crossHairVisible: boolean;
     activeLabelType: LabelType;
     activeImageIndex: number;
+    activeProjectId: string | null;
+    imagesCount: number;
 }
 
 const EditorTopNavigationBar: React.FC<IProps> = (
@@ -83,7 +87,9 @@ const EditorTopNavigationBar: React.FC<IProps> = (
         imageDragMode,
         crossHairVisible,
         activeLabelType,
-        activeImageIndex
+        activeImageIndex,
+        activeProjectId,
+        imagesCount
     }) => {
     const getClassName = () => {
         return classNames(
@@ -203,6 +209,18 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         () => activeImageIndex > 0 && LabelActions.reapplyLabelsFromPreviousImage()
                     )
                 }
+                {
+                    getButtonWithTooltip(
+                        'reorder-by-similarity',
+                        'analyze image similarity on the backend and reorder the project sequence',
+                        'ico/files.png',
+                        'reorder-by-similarity',
+                        false,
+                        !activeProjectId || imagesCount < 2,
+                        undefined,
+                        () => activeProjectId && imagesCount > 1 && ImageSimilarityActions.orderProjectImages(activeProjectId)
+                    )
+                }
             </div>
             {withAI && <div className='ButtonWrapper'>
                     {
@@ -230,6 +248,35 @@ const EditorTopNavigationBar: React.FC<IProps> = (
                         )
                     }
                 </div>}
+            
+            {/* Active Learning Backend Tools */}
+             <div className='ButtonWrapper'>
+                 {
+                     getButtonWithTooltip(
+                         'al-predict',
+                         'Active Learning: Auto-detect objects via Python Backend',
+                         'ico/robot.png',
+                         'al-predict',
+                         false,
+                         false,
+                         undefined,
+                         () => AIActiveLearningActions.predict(LabelsSelector.getActiveImageData())
+                     )
+                 }
+                 {
+                     getButtonWithTooltip(
+                         'al-train',
+                         'Active Learning: Retrain Model on Server',
+                         'ico/ai.png',
+                         'al-train',
+                         false,
+                         false,
+                         undefined,
+                         () => AIActiveLearningActions.triggerTrain(activeProjectId)
+                     )
+                 }
+             </div>
+
         </div>
     );
 };
@@ -244,7 +291,9 @@ const mapStateToProps = (state: AppState) => ({
     imageDragMode: state.general.imageDragMode,
     crossHairVisible: state.general.crossHairVisible,
     activeLabelType: state.labels.activeLabelType,
-    activeImageIndex: state.labels.activeImageIndex
+    activeImageIndex: state.labels.activeImageIndex,
+    activeProjectId: state.projects.activeProjectId,
+    imagesCount: state.labels.imagesData.length
 });
 
 export default connect(

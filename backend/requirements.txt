@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+# YOLO e ML
+ultralytics
+opencv-python
+albumentations
+# Conectividade e utils
+pydantic
+aiofiles
+transformers
+torch
+Pillow

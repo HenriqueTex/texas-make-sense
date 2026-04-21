@@ -62,9 +62,14 @@ export class EditorActions {
     // =================================================================================================================
 
     public static fullRender() {
+        if (!EditorModel.canvas || !EditorModel.primaryRenderingEngine) return;
         DrawUtil.clearCanvas(EditorModel.canvas);
         EditorModel.primaryRenderingEngine.render(EditorActions.getEditorData());
-        EditorModel.supportRenderingEngine && EditorModel.supportRenderingEngine.render(EditorActions.getEditorData());
+        // Support engine draws existing labels using image-space coordinates, which
+        // require a loaded image for the scale calc — skip while image is null.
+        if (EditorModel.supportRenderingEngine && EditorModel.image) {
+            EditorModel.supportRenderingEngine.render(EditorActions.getEditorData());
+        }
     }
 
     // =================================================================================================================
